@@ -19,7 +19,7 @@ import datetime
 
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common.policies import FeedForwardPolicy
-from stable_baselines import PPO1
+from stable_baselines import TRPO
 import os
 import sys
 import inspect
@@ -52,29 +52,14 @@ if __name__ == "__main__":
 
     gamma = arg_or_default("--gamma", default=0.99)
     print("gamma = %f" % gamma)
-    model_id = f"{datetime.datetime.now().strftime('%Y-%m-%d-%H:%M')}"
-    # model = PPO1(MyMlpPolicy,
-    #             env,
-    #             verbose=0,
-    #             schedule='constant',
-    #             timesteps_per_actorbatch=8192,
-    #             optim_batchsize=2048,
-    #             gamma=gamma,
-    #             tensorboard_log=f"./tensorboard/{model_id}")
-    model = PPO1(MyMlpPolicy,
+    model_code = "trpo"
+    model_id = f"{model_code}_{datetime.datetime.now().strftime('%Y-%m-%d-%H:%M')}"
+    model = TRPO(MyMlpPolicy,
                 env,
                 verbose=1,
-                schedule='constant',
-                timesteps_per_actorbatch=400*20,
-                optim_batchsize=400*5,
+                timesteps_per_batch=400*20,
                 gamma=gamma,
                 tensorboard_log=f"./tensorboard/{model_id}")
-
-    # for i in range(0, 6):
-        # with model.graph.as_default():                                                                   
-        #     saver = tf.train.Saver()                                                                     
-        #     saver.save(training_sess, "./log/pcc_model_%d.ckpt" % i)
-        # model.learn(total_timesteps=(1600 * 410))
 
     n_episode = 10000
     timesteps_per_episode = 400

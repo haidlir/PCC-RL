@@ -102,3 +102,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# additional path
+pcc_log.txt
+src/gym/log/
+src/gym/pcc_saved_models/
+src/gym/sim-log/
+src/gym/tensorboard/

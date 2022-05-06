@@ -19,7 +19,7 @@ import datetime
 
 from stable_baselines.common.policies import MlpPolicy
 from stable_baselines.common.policies import FeedForwardPolicy
-from stable_baselines import PPO1
+from stable_baselines import PPO1, PPO1_MOD
 import os
 import sys
 import inspect
@@ -52,7 +52,8 @@ if __name__ == "__main__":
 
     gamma = arg_or_default("--gamma", default=0.99)
     print("gamma = %f" % gamma)
-    model_id = f"{datetime.datetime.now().strftime('%Y-%m-%d-%H:%M')}"
+    model_code = "xavier_init"
+    model_id = f"{model_code}_{datetime.datetime.now().strftime('%Y-%m-%d-%H:%M')}"
     # model = PPO1(MyMlpPolicy,
     #             env,
     #             verbose=0,
@@ -61,13 +62,17 @@ if __name__ == "__main__":
     #             optim_batchsize=2048,
     #             gamma=gamma,
     #             tensorboard_log=f"./tensorboard/{model_id}")
-    model = PPO1(MyMlpPolicy,
+    policy_kwargs = {
+        'initializer_type': 'xavier'
+    }
+    model = PPO1_MOD(MyMlpPolicy,
                 env,
                 verbose=1,
                 schedule='constant',
                 timesteps_per_actorbatch=400*20,
                 optim_batchsize=400*5,
                 gamma=gamma,
+                policy_kwargs=policy_kwargs,
                 tensorboard_log=f"./tensorboard/{model_id}")
 
     # for i in range(0, 6):

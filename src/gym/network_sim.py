@@ -124,10 +124,11 @@ class Network():
         end_time = self.cur_time + dur
         for sender in self.senders:
             sender.reset_obs()
-
+        # print(f"run fo dur - len q : {len(self.q)}")
+        # print(f"cur_time: {self.cur_time}; end_time: {end_time}")
         while self.cur_time < end_time:
             event_time, sender, event_type, next_hop, cur_latency, dropped = heapq.heappop(self.q)
-            #print("Got event %s, to link %d, latency %f at time %f" % (event_type, next_hop, cur_latency, event_time))
+            # print("Got event %s, to link %d, latency %f at time %f" % (event_type, next_hop, cur_latency, event_time))
             self.cur_time = event_time
             new_event_time = event_time
             new_event_type = event_type
@@ -154,7 +155,7 @@ class Network():
                     push_new_event = True
             if event_type == EVENT_TYPE_SEND:
                 if next_hop == 0:
-                    #print("Packet sent at time %f" % self.cur_time)
+                    # print("Packet sent at time %f" % self.cur_time)
                     if sender.can_send_packet():
                         sender.on_packet_sent()
                         push_new_event = True
@@ -176,6 +177,7 @@ class Network():
                    
             if push_new_event:
                 heapq.heappush(self.q, (new_event_time, sender, new_event_type, new_next_hop, new_latency, new_dropped))
+            # print(f"end while q - {len(self.q)}")
 
         sender_mi = self.senders[0].get_run_data()
         throughput = sender_mi.get("recv rate")
@@ -404,8 +406,8 @@ class SimulatedNetworkEnv(gym.Env):
         return sender_obs
 
     def step(self, actions):
-        #print("Actions: %s" % str(actions))
-        #print(actions)
+        # print("Actions: %s | Steps_Taken: %s" % (str(actions), self.steps_taken))
+        # print(actions)
         for i in range(0, 1):#len(actions)):
             #print("Updating rate for sender %d" % i)
             action = actions
@@ -473,13 +475,13 @@ class SimulatedNetworkEnv(gym.Env):
         self.net = Network(self.senders, self.links)
         self.episodes_run += 1
         if self.episodes_run > 0 and self.episodes_run % 100 == 0:
-            self.dump_events_to_file("pcc_env_log_run_%d.json" % self.episodes_run)
+            self.dump_events_to_file("./sim-log/pcc_env_log_run_%d.json" % self.episodes_run)
         self.event_record = {"Events":[]}
         self.net.run_for_dur(self.run_dur)
         self.net.run_for_dur(self.run_dur)
         self.reward_ewma *= 0.99
         self.reward_ewma += 0.01 * self.reward_sum
-        print("Reward: %0.2f, Ewma Reward: %0.2f" % (self.reward_sum, self.reward_ewma))
+        print("Ep: %s, Reward: %0.2f, Ewma Reward: %0.2f" % (self.episodes_run, self.reward_sum, self.reward_ewma))
         self.reward_sum = 0.0
         return self._get_all_sender_obs()
 
@@ -496,5 +498,6 @@ class SimulatedNetworkEnv(gym.Env):
             json.dump(self.event_record, f, indent=4)
 
 register(id='PccNs-v0', entry_point='network_sim:SimulatedNetworkEnv')
-#env = SimulatedNetworkEnv()
-#env.step([1.0])
+# env = SimulatedNetworkEnv()
+# env.reset()
+# env.step([1.0])
